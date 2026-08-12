@@ -1,0 +1,36 @@
+
+default_platform(:android)
+
+platform :android do
+  # Repo root (android/fastlane -> ../..)
+  def flutter_project_root
+    File.expand_path("../..", __dir__)
+  end
+
+  # Split ABI output: app-arm64-v8a-release.apk ("a8" / arm64-v8a)
+  def split_apk_path(abi)
+    File.join(flutter_project_root, "build/app/outputs/flutter-apk", "app-#{abi}-release.apk")
+  end
+
+  desc "flutter clean, flutter build apk --split-per-abi, upload arm64-v8a APK to Firebase App Distribution"
+  lane :firebase_distribution do |options|
+    root = flutter_project_root
+    abi = options[:abi] || "arm64-v8a"
+
+    Dir.chdir(root) do
+      sh("flutter clean")
+      sh("flutter build apk --release --split-per-abi --target-platform android-arm,android-arm64")
+    end
+
+    apk_path = options[:apk_path] || split_apk_path(abi)
+    UI.user_error!("APK not found: #{apk_path}. Expected split output for #{abi}.") unless File.exist?(apk_path)
+
+    firebase_app_distribution(
+      app: options[:app_id] || ENV["FIREBASE_APP_ID"] || "1:997238054211:android:f580d1e7fe2abd3a5823f6",
+      apk_path: apk_path,
+      release_notes: options[:release_notes] || "Automated release from Fastlane (#{abi})",
+      testers: options[:testers] || "mohamedgemy1211@gmail.com",
+      groups: options[:groups] || "testers"
+    )
+  end
+end

@@ -1,0 +1,19 @@
+import 'package:dartz/dartz.dart';
+
+import '../../../../core/error/failure.dart';
+import '../../../../core/models/usecase.dart';
+import '../../data/models/responses/get_service_details_response.dart';
+import '../repository/home_repository.dart';
+
+class GetServiceDetailsUseCase
+    implements UseCase<GetServiceDetailsResponse, String> {
+  final HomeRepository homeRepository;
+
+  const GetServiceDetailsUseCase({required this.homeRepository});
+
+  @override
+  Future<Either<Failure, GetServiceDetailsResponse>> call(
+      String serviceId) async {
+    return homeRepository.getServiceDetails(serviceId);
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "997238054211",
+    "project_id": "remotely-app-r23y4",
+    "storage_bucket": "remotely-app-r23y4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997238054211:android:f580d1e7fe2abd3a5823f6",
+        "android_client_info": {
+          "package_name": "com.example.remotely"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCsxYGSqZe2fM_cEborGGw28VA0JOMNyl4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
