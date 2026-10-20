@@ -9,7 +9,6 @@ import '../../../../core/services/firebase_analytics_service.dart';
 import '../../../../core/utils/assets_manager/assets_manager.dart';
 import '../../../../core/utils/color_manager/color_manager.dart';
 import '../../../../core/utils/routes_manager/routes_manager.dart';
-import '../../../../core/utils/style_manager/style_manager.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../../../../core/widgets/custom_image.dart';
 import '../../../../core/widgets/custom_text.dart';
@@ -19,6 +18,23 @@ import '../../../../injection_container/injection_container.dart';
 import '../../data/models/requests/login_request.dart';
 import '../cubits/SendOtpVerification/send_otp_verification_cubit.dart';
 import '../cubits/login/login_cubit.dart';
+
+// الاستايلات كـ const عشان الـ Text widgets تبقى const وميتعادش بناؤها كل rebuild.
+const _kTitleStyle = TextStyle(
+  fontSize: 28,
+  fontWeight: FontWeight.bold,
+  color: CustomColorsManager.primaryColor,
+);
+const _kLinkStyle = TextStyle(
+  fontSize: 15,
+  fontWeight: FontWeight.normal,
+  color: CustomColorsManager.blueColor,
+);
+const _kCheckboxLabelStyle = TextStyle(
+  fontSize: 15,
+  fontWeight: FontWeight.normal,
+  color: CustomColorsManager.mainTextColor,
+);
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -32,16 +48,19 @@ class _LoginScreenState extends State<LoginScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final FirebaseAnalyticsService _analytics = FirebaseAnalyticsService.instance;
-  bool _isLoading = false;
-  bool _isPasswordVisible = false;
-  bool _saveLoginData = false;
+
+  // ValueNotifier بدل الـ bool + setState: كل واحد بيحرّك الجزء بتاعه بس.
+  final _isLoading = ValueNotifier<bool>(false);
+  final _isPasswordVisible = ValueNotifier<bool>(false);
+  final _saveLoginData = ValueNotifier<bool>(false);
 
   SendOtpVerificationCubit sendOtpVerificationCubit = sl<SendOtpVerificationCubit>();
 
   @override
   void initState() {
     super.initState();
-    _saveLoginData = TpPreferencesManager.retrieveBool(TpPreferencesManager.saveLoginData) ?? false;
+    _saveLoginData.value =
+        TpPreferencesManager.retrieveBool(TpPreferencesManager.saveLoginData) ?? false;
     final savedEmail = TpPreferencesManager.retrieveString(TpPreferencesManager.savedEmail);
     final savedPass = TpPreferencesManager.retrieveString(TpPreferencesManager.savedPass);
     if (savedEmail != null && savedEmail.isNotEmpty) emailController.text = savedEmail;
@@ -52,18 +71,27 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+    _isLoading.dispose();
+    _isPasswordVisible.dispose();
+    _saveLoginData.dispose();
     super.dispose();
   }
 
+  void _toggleSaveLoginData() {
+    final next = !_saveLoginData.value;
+    _saveLoginData.value = next;
+    TpPreferencesManager.saveBool(TpPreferencesManager.saveLoginData, next);
+  }
+
   Future<void> _handleLogin() async {
-    if (_isLoading) return;
+    if (_isLoading.value) return;
     if (!(_formKey.currentState?.validate() ?? false)) return;
 
     await _analytics.logLoginButtonPressed(username: emailController.text.trim());
 
     if (!mounted) return;
     FocusScope.of(context).unfocus();
-    setState(() => _isLoading = true);
+    _isLoading.value = true;
 
     final success = await sl<LoginCubit>().login(
       loginRequest: LoginRequest(
@@ -74,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ),
     );
 
-    setState(() => _isLoading = false);
+    _isLoading.value = false;
 
     if (success == true) {
       await _analytics.logLogin(
@@ -82,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
         username: emailController.text.trim(),
       );
 
-      if (_saveLoginData) {
+      if (_saveLoginData.value) {
         await TpPreferencesManager.saveString(
           TpPreferencesManager.savedEmail,
           emailController.text.trim(),
@@ -141,21 +169,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CustomImage(
+                      const CustomImage(
                         imagePath: CustomAssetsManager.logoPNG,
                         width: 60,
                         height: 60,
                         fit: BoxFit.contain,
                       ),
                       const SizedBox(height: 32),
-                      CustomText(
-                        "تسجيل الدخول",
-                        style: CustomStyleManger.heading1.copyWith(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: CustomColorsManager.primaryColor,
-                        ),
-                      ),
+                      const CustomText("تسجيل الدخول", style: _kTitleStyle),
                       const SizedBox(height: 32),
                       LabeledFormField(
                         label: "البريد الإلكتروني",
@@ -168,21 +189,26 @@ class _LoginScreenState extends State<LoginScreen> {
                       const SizedBox(height: 24),
                       LabeledFormField(
                         label: "كلمة السر",
-                        child: CustomTextFormField(
-                          hintText: "أدخل كلمة السر",
-                          controller: passwordController,
-                          obscureText: !_isPasswordVisible,
-                          validator: (v) => v == null || v.length < 6 ? "كلمة السر قصيرة" : null,
-                          onFieldSubmitted: (_) => _handleLogin(),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              _isPasswordVisible ? Icons.visibility_off : Icons.visibility,
-                              color: CustomColorsManager.lightTextColor,
-                            ),
-                            onPressed: () {
-                              setState(() => _isPasswordVisible = !_isPasswordVisible);
-                            },
-                          ),
+                        // بيتبني تاني لوحده بس لما تضغط عين إظهار الباسورد.
+                        child: ValueListenableBuilder<bool>(
+                          valueListenable: _isPasswordVisible,
+                          builder: (context, isVisible, _) {
+                            return CustomTextFormField(
+                              hintText: "أدخل كلمة السر",
+                              controller: passwordController,
+                              obscureText: !isVisible,
+                              validator: (v) =>
+                                  v == null || v.length < 6 ? "كلمة السر قصيرة" : null,
+                              onFieldSubmitted: (_) => _handleLogin(),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  isVisible ? Icons.visibility_off : Icons.visibility,
+                                  color: CustomColorsManager.lightTextColor,
+                                ),
+                                onPressed: () => _isPasswordVisible.value = !isVisible,
+                              ),
+                            );
+                          },
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -190,62 +216,55 @@ class _LoginScreenState extends State<LoginScreen> {
                         alignment: AlignmentDirectional.centerEnd,
                         child: GestureDetector(
                           onTap: () => Get.toNamed(Routes.forgotPassword),
-                          child: CustomText(
-                            'نسيت كلمة المرور؟',
-                            style: CustomStyleManger.normalText.copyWith(
-                              fontSize: 15,
-                              color: CustomColorsManager.blueColor,
-                            ),
-                          ),
+                          child: const CustomText('نسيت كلمة المرور؟', style: _kLinkStyle),
                         ),
                       ),
                       const SizedBox(height: 20),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          // الـ Checkbox بس اللي بيتبني، والنص جنبه const ثابت.
                           SizedBox(
                             width: 24,
                             height: 24,
-                            child: Checkbox(
-                              value: _saveLoginData,
-                              onChanged: (v) {
-                                setState(() => _saveLoginData = v ?? true);
-                                TpPreferencesManager.saveBool(
-                                  TpPreferencesManager.saveLoginData,
-                                  v ?? true,
+                            child: ValueListenableBuilder<bool>(
+                              valueListenable: _saveLoginData,
+                              builder: (context, saveData, _) {
+                                return Checkbox(
+                                  value: saveData,
+                                  onChanged: (_) => _toggleSaveLoginData(),
+                                  activeColor: CustomColorsManager.primaryColor,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
                                 );
                               },
-                              activeColor: CustomColorsManager.primaryColor,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
                             ),
                           ),
                           const SizedBox(width: 10),
                           GestureDetector(
-                            onTap: () {
-                              setState(() => _saveLoginData = !_saveLoginData);
-                              TpPreferencesManager.saveBool(
-                                TpPreferencesManager.saveLoginData,
-                                !_saveLoginData,
-                              );
-                            },
-                            child: CustomText(
+                            onTap: _toggleSaveLoginData,
+                            child: const CustomText(
                               "حفظ بيانات الدخول",
-                              style: CustomStyleManger.normalText.copyWith(
-                                fontSize: 15,
-                                color: CustomColorsManager.mainTextColor,
-                              ),
+                              style: _kCheckboxLabelStyle,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 28),
-                      CustomButton(
-                        text: _isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول",
-                        onPressed: _isLoading ? null : _handleLogin,
-                        backGroundColor: CustomColorsManager.primaryColor,
-                        child: _isLoading
-                            ? const CircularProgressIndicator(color: Colors.white)
-                            : null,
+                      // الزرار بس اللي بيتبني وقت اللودينج.
+                      ValueListenableBuilder<bool>(
+                        valueListenable: _isLoading,
+                        builder: (context, isLoading, _) {
+                          return CustomButton(
+                            text: isLoading ? "جاري تسجيل الدخول..." : "تسجيل الدخول",
+                            onPressed: isLoading ? null : _handleLogin,
+                            backGroundColor: CustomColorsManager.primaryColor,
+                            child: isLoading
+                                ? const CircularProgressIndicator(color: Colors.white)
+                                : null,
+                          );
+                        },
                       ),
                     ],
                   ),

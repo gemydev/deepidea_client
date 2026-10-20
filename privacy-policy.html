@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — DeepIdea</title>
+<meta name="description" content="Privacy Policy for the DeepIdea mobile application / سياسة خصوصية تطبيق DeepIdea">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f6f7f9;
+    --border: #e2e5ea;
+    --text: #1a1d23;
+    --muted: #5c6470;
+    --accent: #2563eb;
+    --accent-soft: #eff4ff;
+    --warn-bg: #fff8e6;
+    --warn-border: #f0c96a;
+    --warn-text: #6b4e05;
+    --radius: 10px;
+    --maxw: 820px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14161a;
+      --surface: #1c1f25;
+      --border: #2d323a;
+      --text: #e8eaed;
+      --muted: #9aa3b0;
+      --accent: #7ba3ff;
+      --accent-soft: #1d2637;
+      --warn-bg: #2b2413;
+      --warn-border: #6b5518;
+      --warn-text: #e8cd8a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14161a;
+    --surface: #1c1f25;
+    --border: #2d323a;
+    --text: #e8eaed;
+    --muted: #9aa3b0;
+    --accent: #7ba3ff;
+    --accent-soft: #1d2637;
+    --warn-bg: #2b2413;
+    --warn-border: #6b5518;
+    --warn-text: #e8cd8a;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  [dir="rtl"] {
+    font-family: "IBM Plex Sans Arabic", "IBM Plex Sans", -apple-system, "Segoe UI", Tahoma, sans-serif;
+  }
+
+  .wrap {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  /* ---- language switcher ---- */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .topbar-inner {
+    max-width: var(--maxw);
+    margin: 0 auto;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .brand {
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .langs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 3px;
+  }
+  .langs button {
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    background: none;
+    border: 0;
+    padding: 5px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .15s, color .15s;
+  }
+  .langs button:hover { color: var(--text); }
+  .langs button[aria-selected="true"] {
+    background: var(--bg);
+    color: var(--accent);
+    box-shadow: 0 1px 2px rgba(0,0,0,.08);
+  }
+  .langs button:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---- typography ---- */
+  h1 {
+    font-size: clamp(26px, 5vw, 34px);
+    line-height: 1.25;
+    letter-spacing: -0.02em;
+    margin: 0 0 8px;
+  }
+  h2 {
+    font-size: clamp(19px, 3.4vw, 22px);
+    line-height: 1.35;
+    letter-spacing: -0.01em;
+    margin: 44px 0 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  h3 {
+    font-size: 17px;
+    margin: 28px 0 8px;
+  }
+  p, ul, ol { margin: 0 0 16px; }
+  ul, ol { padding-inline-start: 24px; }
+  li { margin-bottom: 6px; }
+  a { color: var(--accent); }
+  strong { font-weight: 600; }
+
+  .updated {
+    color: var(--muted);
+    font-size: 15px;
+    margin-bottom: 24px;
+  }
+
+  .lede {
+    font-size: 17px;
+    color: var(--text);
+  }
+
+  .todo {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    color: var(--warn-text);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    font-size: 14.5px;
+    margin: 0 0 28px;
+  }
+  .todo strong { font-weight: 700; }
+
+  mark.ph {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px dashed currentColor;
+    border-radius: 4px;
+    padding: 0 5px;
+    font-weight: 600;
+    font-size: 0.92em;
+  }
+
+  /* ---- tables ---- */
+  .tablewrap {
+    overflow-x: auto;
+    margin: 0 0 20px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 15px;
+  }
+  th, td {
+    text-align: start;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  thead th {
+    background: var(--surface);
+    font-weight: 600;
+    font-size: 13.5px;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: 0; }
+
+  .contact {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    margin-bottom: 20px;
+  }
+  .contact p { margin: 0 0 4px; }
+  .contact .name { font-weight: 700; font-size: 17px; margin-bottom: 8px; }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 480px) {
+    body { font-size: 15.5px; }
+    th, td { padding: 9px 11px; font-size: 14.5px; }
+  }
+
+  @media print {
+    .topbar { display: none; }
+    body { font-size: 11pt; }
+    h2 { page-break-after: avoid; }
+    .tablewrap { break-inside: avoid; }
+    /* print whichever language is on screen */
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <span class="brand">DeepIdea</span>
+    <div class="langs" role="tablist" aria-label="Language / اللغة">
+      <button role="tab" id="tab-en" aria-controls="doc-en" aria-selected="true" onclick="setLang('en')">English</button>
+      <button role="tab" id="tab-ar" aria-controls="doc-ar" aria-selected="false" onclick="setLang('ar')">العربية</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============================= ENGLISH ============================= -->
+<main id="doc-en" role="tabpanel" aria-labelledby="tab-en" dir="ltr" lang="en">
+
+  <h1>Privacy Policy — DeepIdea</h1>
+  <p class="updated">Last updated: 20 September 2026</p>
+
+  <div class="todo">
+    <strong>TODO before publishing:</strong> replace <mark class="ph">[SUPPORT EMAIL]</mark>, <mark class="ph">[COMPANY ADDRESS]</mark>, <mark class="ph">[WEBSITE]</mark>, and <mark class="ph">[COUNTRY / JURISDICTION]</mark> with your real details, then host this page and paste the URL into Google Play Console → App content → Privacy policy. Delete this box afterwards.
+  </div>
+
+  <p class="lede">DeepIdea (“DeepIdea”, “we”, “us”) operates the DeepIdea mobile application (the “App”). This policy explains what personal data the App collects, why we collect it, who we share it with, and the rights you have over it.</p>
+  <p>By creating an account or using the App, you agree to this policy.</p>
+
+  <h2>1. Information we collect</h2>
+
+  <h3>1.1 Information you give us</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Data</th><th>Where it comes from</th><th>Why we need it</th></tr></thead>
+      <tbody>
+        <tr><td>Name, email address, phone number</td><td>Registration, profile screen</td><td>Creating and identifying your account</td></tr>
+        <tr><td>Password (stored hashed) and one-time codes (OTP)</td><td>Login, password reset</td><td>Authenticating you and recovering access</td></tr>
+        <tr><td>Profile details you choose to add</td><td>Account settings</td><td>Personalising your profile</td></tr>
+        <tr><td>Orders, invoices, contracts, loyalty points, favourites</td><td>Using the services in the App</td><td>Delivering the services you request and keeping your records</td></tr>
+        <tr><td>Messages, attachments, and support requests</td><td>Chat and support screens</td><td>Delivering your messages and answering your enquiries</td></tr>
+        <tr><td>Files and documents you upload</td><td>File picker</td><td>Attaching documents to your orders, contracts, or chats</td></tr>
+        <tr><td>Invitations you send to friends</td><td>Invitations screen</td><td>Sending the invitation you asked us to send</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>1.2 Information collected automatically</h3>
+  <ul>
+    <li><strong>Device and technical data</strong> — device model, operating system version, app version, language, time zone, and a randomly generated device/installation identifier.</li>
+    <li><strong>Network state</strong> — whether the device is online and the connection type, so the App can queue work while offline.</li>
+    <li><strong>Usage and analytics events</strong> — screens opened and actions taken inside the App, collected through <strong>Google Firebase Analytics</strong>.</li>
+    <li><strong>Diagnostic data</strong> — crash and error information used to fix defects.</li>
+  </ul>
+
+  <h3>1.3 Information from device features (only with your permission)</h3>
+  <p>The App asks for the following Android/iOS permissions. Each is optional; the related feature simply will not work if you decline.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Permission</th><th>Used for</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Camera</strong></td><td>Video calls and capturing documents you choose to attach</td></tr>
+        <tr><td><strong>Microphone / audio</strong></td><td>Voice and video calls</td></tr>
+        <tr><td><strong>Bluetooth</strong></td><td>Connecting to card-reader / SoftPOS hardware for in-person payments</td></tr>
+        <tr><td><strong>Notifications</strong></td><td>Delivering call, message, and order notifications</td></tr>
+        <tr><td><strong>Biometrics (fingerprint / face)</strong></td><td>Unlocking the App locally. Biometric data never leaves your device and is never sent to us — the operating system only tells the App whether the check succeeded</td></tr>
+        <tr><td><strong>Display over other apps / wake lock / vibrate</strong></td><td>Showing and ringing incoming call screens</td></tr>
+        <tr><td><strong>Storage / file access</strong></td><td>Selecting files you choose to upload</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>1.4 Payment information</h3>
+  <p>Payments are processed by our payment provider <strong>EdfaPay</strong>. Card numbers, CVV codes, and other full payment credentials are entered into the provider’s secure page or SDK and are <strong>not collected, stored, or accessible by DeepIdea</strong>. We receive only the transaction result — such as amount, currency, status, date, and a masked card reference — and store it with your invoice.</p>
+
+  <h3>1.5 Data we do not collect</h3>
+  <p>We do not collect precise device location, contacts, call logs, SMS messages, or health data.</p>
+
+  <h2>2. How we use your information</h2>
+  <p>We use personal data to:</p>
+  <ol>
+    <li>Create, secure, and administer your account;</li>
+    <li>Provide the App’s core features — services, orders, invoices, contracts, chat, and voice/video calls;</li>
+    <li>Process payments and issue invoices and loyalty points;</li>
+    <li>Send transactional notifications (order status, incoming calls, new messages, security alerts);</li>
+    <li>Provide customer support and respond to your requests;</li>
+    <li>Analyse aggregate usage so we can improve stability and design;</li>
+    <li>Detect, prevent, and investigate fraud, abuse, and security incidents;</li>
+    <li>Meet our legal, tax, and accounting obligations.</li>
+  </ol>
+  <p>We do <strong>not</strong> sell your personal data, and we do not use your chat content or uploaded files for advertising.</p>
+
+  <h2>3. Legal bases (for users in the EEA/UK)</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Purpose</th><th>Legal basis</th></tr></thead>
+      <tbody>
+        <tr><td>Providing the App and your account</td><td>Performance of a contract</td></tr>
+        <tr><td>Payments, invoicing, record-keeping</td><td>Contract and legal obligation</td></tr>
+        <tr><td>Security, fraud prevention, product improvement</td><td>Legitimate interests</td></tr>
+        <tr><td>Analytics and optional notifications</td><td>Consent, where required</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Where we rely on consent, you may withdraw it at any time — this does not affect processing carried out before withdrawal.</p>
+
+  <h2>4. Sharing your information</h2>
+  <p>We share personal data only with:</p>
+  <ul>
+    <li><strong>Service providers acting on our instructions:</strong>
+      <ul>
+        <li><strong>ZEGOCLOUD</strong> — real-time voice and video call infrastructure;</li>
+        <li><strong>Google Firebase (Google LLC)</strong> — analytics and app infrastructure;</li>
+        <li><strong>EdfaPay</strong> — payment processing;</li>
+        <li>Our hosting and backend providers, which operate the App’s servers and store your account data.</li>
+      </ul>
+    </li>
+    <li><strong>Professional advisers</strong> (accountants, auditors, lawyers) under confidentiality obligations.</li>
+    <li><strong>Authorities</strong>, where we are legally required to disclose data, or to establish, exercise, or defend legal claims.</li>
+    <li><strong>A successor entity</strong>, in the event of a merger, acquisition, or sale of assets — subject to this policy.</li>
+  </ul>
+  <p>Each provider receives only the data needed for its function and is bound by contract to protect it.</p>
+
+  <h2>5. International transfers</h2>
+  <p>Our providers may process data on servers outside your country, including outside the EEA. Where required, such transfers rely on appropriate safeguards such as the European Commission’s Standard Contractual Clauses.</p>
+
+  <h2>6. How long we keep data</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Data</th><th>Retention</th></tr></thead>
+      <tbody>
+        <tr><td>Account and profile data</td><td>While your account is active</td></tr>
+        <tr><td>Orders, invoices, contracts, payment records</td><td>Up to 10 years, or as required by applicable tax and commercial law</td></tr>
+        <tr><td>Chat messages and attachments</td><td>While your account is active, unless you delete them earlier</td></tr>
+        <tr><td>Support tickets</td><td>3 years after the ticket is closed</td></tr>
+        <tr><td>Analytics and diagnostic data</td><td>Up to 14 months, in aggregate or pseudonymised form</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>When you delete your account, we delete or irreversibly anonymise your personal data within <strong>30 days</strong>, except records we must keep by law.</p>
+
+  <h2>7. Security</h2>
+  <p>We protect your data with encryption in transit (HTTPS/TLS), access controls limiting staff access to what their role requires, hashed password storage, and optional biometric app-lock on your device. No method of transmission or storage is completely secure, so we cannot guarantee absolute security. If a breach affects your personal data, we will notify you and the competent authority where the law requires it.</p>
+
+  <h2>8. Your rights</h2>
+  <p>Subject to applicable law, you may:</p>
+  <ul>
+    <li><strong>Access</strong> the personal data we hold about you;</li>
+    <li><strong>Correct</strong> inaccurate or incomplete data — much of it directly in the profile screen;</li>
+    <li><strong>Delete</strong> your account and data;</li>
+    <li><strong>Restrict</strong> or <strong>object to</strong> certain processing;</li>
+    <li><strong>Port</strong> your data to another provider in a machine-readable format;</li>
+    <li><strong>Withdraw consent</strong> at any time;</li>
+    <li><strong>Complain</strong> to your local data protection authority.</li>
+  </ul>
+  <p>To exercise any of these, email <mark class="ph">[SUPPORT EMAIL]</mark>. We respond within 30 days. We may ask you to verify your identity before acting on a request.</p>
+  <p>You can also manage permissions (camera, microphone, notifications, Bluetooth) at any time in your device settings.</p>
+
+  <h2>9. Children</h2>
+  <p>The App is not directed at children under <strong>16</strong>, and we do not knowingly collect their personal data. If you believe a child has given us personal data, contact <mark class="ph">[SUPPORT EMAIL]</mark> and we will delete it.</p>
+
+  <h2>10. Changes to this policy</h2>
+  <p>We may update this policy. The “Last updated” date above always reflects the current version. For material changes we will notify you in the App or by email before the change takes effect. Continuing to use the App after that means you accept the updated policy.</p>
+
+  <h2>11. Contact us</h2>
+  <div class="contact">
+    <p class="name">DeepIdea</p>
+    <p>Email: <mark class="ph">[SUPPORT EMAIL]</mark></p>
+    <p>Address: <mark class="ph">[COMPANY ADDRESS]</mark></p>
+    <p>Website: <mark class="ph">[WEBSITE]</mark></p>
+  </div>
+  <p>This policy is governed by the laws of <mark class="ph">[COUNTRY / JURISDICTION]</mark>.</p>
+
+  <footer>© 2026 DeepIdea. Last updated 20 September 2026.</footer>
+</main>
+
+<!-- ============================= ARABIC ============================= -->
+<main id="doc-ar" role="tabpanel" aria-labelledby="tab-ar" dir="rtl" lang="ar" hidden>
+
+  <h1>سياسة الخصوصية — DeepIdea</h1>
+  <p class="updated">آخر تحديث: ٢٠ سبتمبر ٢٠٢٦</p>
+
+  <div class="todo">
+    <strong>قبل النشر:</strong> استبدل <mark class="ph">[SUPPORT EMAIL]</mark> و<mark class="ph">[COMPANY ADDRESS]</mark> و<mark class="ph">[WEBSITE]</mark> و<mark class="ph">[COUNTRY / JURISDICTION]</mark> ببياناتك الحقيقية، ثم احذف هذا التنبيه.
+  </div>
+
+  <p class="lede">تُشغّل DeepIdea (“نحن”) تطبيق DeepIdea للهواتف المحمولة (“التطبيق”). توضّح هذه السياسة البيانات الشخصية التي يجمعها التطبيق، وسبب جمعها، ومع مَن نشاركها، وما هي حقوقك تجاهها.</p>
+  <p>باستخدامك التطبيق أو إنشائك حساباً فيه، فإنك توافق على هذه السياسة.</p>
+
+  <h2>١. البيانات التي نجمعها</h2>
+
+  <h3>١.١ بيانات تقدّمها أنت</h3>
+  <ul>
+    <li>الاسم والبريد الإلكتروني ورقم الهاتف — لإنشاء حسابك وتحديد هويتك.</li>
+    <li>كلمة المرور (مخزَّنة مشفّرة) ورموز التحقق لمرة واحدة (OTP) — للتحقق من هويتك واستعادة حسابك.</li>
+    <li>بيانات الملف الشخصي التي تختار إضافتها.</li>
+    <li>الطلبات والفواتير والعقود ونقاط الولاء والمفضّلة — لتقديم الخدمات وحفظ سجلاتك.</li>
+    <li>الرسائل والمرفقات وطلبات الدعم الفني.</li>
+    <li>الملفات والمستندات التي ترفعها.</li>
+    <li>دعوات الأصدقاء التي تطلب منّا إرسالها.</li>
+  </ul>
+
+  <h3>١.٢ بيانات تُجمع تلقائياً</h3>
+  <ul>
+    <li>بيانات الجهاز والبيانات التقنية: طراز الجهاز، إصدار نظام التشغيل، إصدار التطبيق، اللغة، المنطقة الزمنية، ومعرّف تثبيت عشوائي.</li>
+    <li>حالة الاتصال بالشبكة.</li>
+    <li>أحداث الاستخدام والتحليلات عبر <strong>Google Firebase Analytics</strong>.</li>
+    <li>بيانات الأعطال والأخطاء لإصلاح الخلل.</li>
+  </ul>
+
+  <h3>١.٣ أذونات الجهاز (بموافقتك فقط)</h3>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>الإذن</th><th>الغرض من استخدامه</th></tr></thead>
+      <tbody>
+        <tr><td><strong>الكاميرا</strong></td><td>مكالمات الفيديو وتصوير المستندات التي تختار إرفاقها</td></tr>
+        <tr><td><strong>الميكروفون</strong></td><td>المكالمات الصوتية والمرئية</td></tr>
+        <tr><td><strong>البلوتوث</strong></td><td>الاتصال بأجهزة قراءة البطاقات (SoftPOS) للدفع الحضوري</td></tr>
+        <tr><td><strong>الإشعارات</strong></td><td>إشعارات المكالمات والرسائل والطلبات</td></tr>
+        <tr><td><strong>البصمة / التعرف على الوجه</strong></td><td>لفتح التطبيق محلياً. لا تغادر بياناتك الحيوية جهازك ولا تصل إلينا إطلاقاً؛ يُعلم نظام التشغيل التطبيق بنتيجة التحقق فقط</td></tr>
+        <tr><td><strong>العرض فوق التطبيقات والاهتزاز وإبقاء الشاشة مضاءة</strong></td><td>لعرض شاشة المكالمات الواردة</td></tr>
+        <tr><td><strong>الوصول إلى الملفات</strong></td><td>لاختيار الملفات التي ترفعها</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>كل إذن اختياري، وفي حال رفضه لن تعمل الميزة المرتبطة به فقط.</p>
+
+  <h3>١.٤ بيانات الدفع</h3>
+  <p>تُعالَج المدفوعات عبر مزوّد الدفع <strong>EdfaPay</strong>. لا نجمع ولا نخزّن ولا نطّلع على أرقام البطاقات أو رموز CVV؛ نستلم نتيجة العملية فقط (المبلغ والعملة والحالة والتاريخ ومرجع مُقنَّع للبطاقة) ونحفظها مع فاتورتك.</p>
+
+  <h3>١.٥ بيانات لا نجمعها</h3>
+  <p>لا نجمع موقعك الجغرافي الدقيق، ولا جهات الاتصال، ولا سجل المكالمات، ولا الرسائل النصية، ولا البيانات الصحية.</p>
+
+  <h2>٢. كيف نستخدم بياناتك</h2>
+  <p>لإنشاء حسابك وتأمينه؛ ولتقديم خدمات التطبيق من طلبات وفواتير وعقود ومحادثات ومكالمات؛ ولمعالجة المدفوعات وإصدار الفواتير ونقاط الولاء؛ ولإرسال الإشعارات المتعلقة بمعاملاتك؛ ولتقديم الدعم الفني؛ ولتحليل الاستخدام الإجمالي بهدف تحسين التطبيق؛ ولمنع الاحتيال وإساءة الاستخدام؛ وللوفاء بالتزاماتنا القانونية والمحاسبية.</p>
+  <p><strong>لا نبيع بياناتك الشخصية</strong>، ولا نستخدم محتوى محادثاتك أو ملفاتك لأغراض إعلانية.</p>
+
+  <h2>٣. مشاركة البيانات</h2>
+  <p>نشارك البيانات فقط مع: مزوّدي الخدمة العاملين بتوجيهاتنا (<strong>ZEGOCLOUD</strong> للمكالمات، و<strong>Google Firebase</strong> للتحليلات والبنية التحتية، و<strong>EdfaPay</strong> للمدفوعات، ومزوّدي الاستضافة والخوادم)؛ والمستشارين المهنيين الملتزمين بالسرية؛ والجهات الرسمية عند وجود التزام قانوني؛ وأي كيان خَلَف في حال الاندماج أو الاستحواذ، مع الالتزام بهذه السياسة. يحصل كل مزوّد على الحد الأدنى من البيانات اللازمة لأداء مهمته.</p>
+
+  <h2>٤. النقل الدولي للبيانات</h2>
+  <p>قد يعالج مزوّدونا البيانات على خوادم خارج بلدك. وعند الاقتضاء، تتم هذه العمليات وفق ضمانات مناسبة مثل الشروط التعاقدية القياسية.</p>
+
+  <h2>٥. مدة الاحتفاظ</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>البيانات</th><th>مدة الاحتفاظ</th></tr></thead>
+      <tbody>
+        <tr><td>بيانات الحساب والملف الشخصي</td><td>طوال فترة نشاط حسابك</td></tr>
+        <tr><td>الطلبات والفواتير والعقود وسجلات الدفع</td><td>حتى ١٠ سنوات أو حسب ما تقتضيه الأنظمة الضريبية والتجارية</td></tr>
+        <tr><td>الرسائل والمرفقات</td><td>طوال فترة نشاط حسابك ما لم تحذفها قبل ذلك</td></tr>
+        <tr><td>تذاكر الدعم</td><td>٣ سنوات من إغلاق التذكرة</td></tr>
+        <tr><td>بيانات التحليلات والأعطال</td><td>حتى ١٤ شهراً بصيغة مجمّعة أو مجهولة الهوية</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>عند حذف حسابك، نحذف بياناتك الشخصية أو نجعلها مجهولة الهوية نهائياً خلال <strong>٣٠ يوماً</strong>، باستثناء ما يلزمنا القانون بحفظه.</p>
+
+  <h2>٦. الأمان</h2>
+  <p>نحمي بياناتك بالتشفير أثناء النقل (HTTPS/TLS)، وبضوابط وصول تحصر اطّلاع الموظفين على ما تقتضيه مهامهم، وبتخزين كلمات المرور مشفّرة، وبقفل التطبيق بالبصمة اختيارياً. لا توجد وسيلة نقل أو تخزين آمنة بالكامل، لذا لا يمكننا ضمان الأمان المطلق. وفي حال وقوع اختراق يمسّ بياناتك، سنُخطرك وتُخطر الجهة المختصة متى ألزمنا القانون بذلك.</p>
+
+  <h2>٧. حقوقك</h2>
+  <p>وفقاً للأنظمة المعمول بها، يحق لك: الاطلاع على بياناتك؛ وتصحيحها؛ وحذف حسابك وبياناتك؛ وتقييد المعالجة أو الاعتراض عليها؛ ونقل بياناتك بصيغة قابلة للقراءة آلياً؛ وسحب موافقتك في أي وقت؛ وتقديم شكوى إلى الجهة الرقابية المختصة.</p>
+  <p>لممارسة أي من هذه الحقوق راسلنا على <mark class="ph">[SUPPORT EMAIL]</mark>، ونردّ خلال ٣٠ يوماً. وقد نطلب التحقق من هويتك قبل تنفيذ الطلب. كما يمكنك إدارة أذونات الكاميرا والميكروفون والإشعارات والبلوتوث في أي وقت من إعدادات جهازك.</p>
+
+  <h2>٨. الأطفال</h2>
+  <p>التطبيق غير موجَّه للأطفال دون سن <strong>١٦</strong> عاماً، ولا نجمع بياناتهم عن عِلم. إذا كنت تعتقد أن طفلاً زوّدنا ببياناته، راسلنا على <mark class="ph">[SUPPORT EMAIL]</mark> وسنحذفها.</p>
+
+  <h2>٩. تعديلات السياسة</h2>
+  <p>قد نُحدّث هذه السياسة، ويُظهر تاريخ “آخر تحديث” أعلاه النسخة السارية. وفي حال إجراء تغييرات جوهرية سنُخطرك داخل التطبيق أو بالبريد الإلكتروني قبل سريانها. ويُعدّ استمرارك في استخدام التطبيق بعد ذلك قبولاً للسياسة المحدَّثة.</p>
+
+  <h2>١٠. التواصل معنا</h2>
+  <div class="contact">
+    <p class="name">DeepIdea</p>
+    <p>البريد الإلكتروني: <mark class="ph">[SUPPORT EMAIL]</mark></p>
+    <p>العنوان: <mark class="ph">[COMPANY ADDRESS]</mark></p>
+    <p>الموقع الإلكتروني: <mark class="ph">[WEBSITE]</mark></p>
+  </div>
+  <p>تخضع هذه السياسة لأنظمة <mark class="ph">[COUNTRY / JURISDICTION]</mark>.</p>
+
+  <footer>© ٢٠٢٦ DeepIdea. آخر تحديث ٢٠ سبتمبر ٢٠٢٦.</footer>
+</main>
+
+</div>
+
+<script>
+  function setLang(lang) {
+    var isAr = lang === 'ar';
+    document.getElementById('doc-en').hidden = isAr;
+    document.getElementById('doc-ar').hidden = !isAr;
+    document.getElementById('tab-en').setAttribute('aria-selected', String(!isAr));
+    document.getElementById('tab-ar').setAttribute('aria-selected', String(isAr));
+    document.documentElement.lang = lang;
+    document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+    try { localStorage.setItem('deepidea-privacy-lang', lang); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+
+  // Restore last choice, else follow the browser language.
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('deepidea-privacy-lang'); } catch (e) {}
+    if (!saved) {
+      saved = (navigator.language || 'en').toLowerCase().indexOf('ar') === 0 ? 'ar' : 'en';
+    }
+    if (saved === 'ar') setLang('ar');
+  })();
+
+  // Allow deep-linking: privacy-policy.html#ar
+  if (location.hash === '#ar') setLang('ar');
+  if (location.hash === '#en') setLang('en');
+</script>
+
+</body>
+</html>

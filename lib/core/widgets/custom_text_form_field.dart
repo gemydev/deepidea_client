@@ -18,6 +18,10 @@ class CustomTextFormField extends StatefulWidget {
   final TextInputAction? textInputAction;
   final double borderRadius;
 
+  /// Re-validates while the user edits, so an error message disappears as soon
+  /// as the value becomes valid instead of sticking until the next submit.
+  final AutovalidateMode autovalidateMode;
+
   const CustomTextFormField({
     super.key,
     required this.hintText,
@@ -33,6 +37,7 @@ class CustomTextFormField extends StatefulWidget {
     this.onFieldSubmitted,
     this.textInputAction,
     this.borderRadius = 12,
+    this.autovalidateMode = AutovalidateMode.onUserInteraction,
   });
 
   @override
@@ -70,6 +75,7 @@ class _CustomTextFormFieldState extends State<CustomTextFormField> {
             keyboardType: widget.keyboardType,
             maxLines: widget.maxLines ?? 1,
             validator: widget.validator,
+            autovalidateMode: widget.autovalidateMode,
             style: CustomStyleManger.normalText.copyWith(
               fontSize: 16,
               color: widget.enabled

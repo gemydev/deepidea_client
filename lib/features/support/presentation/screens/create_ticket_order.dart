@@ -95,18 +95,10 @@ class _CreateTicketOrderState extends State<CreateTicketOrder> {
                           children: [
                             LabeledFormField(
                               label: "عنوان التذكرة",
+                              isOptional: true,
                               child: CustomTextFormField(
                                 hintText: "أدخل عنوان التذكرة",
                                 controller: subjectController,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return "برجاء إدخال عنوان التذكرة";
-                                  }
-                                  if (value.length < 3) {
-                                    return "عنوان التذكرة قصير جدًا";
-                                  }
-                                  return null;
-                                },
                               ),
                             ),
                             const SizedBox(height: 25),
@@ -141,6 +133,8 @@ class _CreateTicketOrderState extends State<CreateTicketOrder> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       FormField<int>(
+                                        initialValue: parentCategoryId,
+                                        autovalidateMode: AutovalidateMode.onUserInteraction,
                                         validator: (_) {
                                           if (parentCategoryId == null) {
                                             return 'برجاء اختيار القسم الرئيسي';
@@ -202,6 +196,9 @@ class _CreateTicketOrderState extends State<CreateTicketOrder> {
                                           ),
                                         ),
                                       FormField<int>(
+                                        key: ValueKey<int?>(parentCategoryId),
+                                        initialValue: categoryId,
+                                        autovalidateMode: AutovalidateMode.onUserInteraction,
                                         validator: (_) {
                                           if (categoryId == null) {
                                             return 'برجاء اختيار نوع التذكرة';
@@ -222,6 +219,9 @@ class _CreateTicketOrderState extends State<CreateTicketOrder> {
                                                 child: AppDropdown(
                                                   key: ValueKey<int?>(parentCategoryId),
                                                   options: subEnabled ? subOptions : const [],
+                                                  searchable: true,
+                                                  header: 'نوع التذكرة',
+                                                  searchHint: 'ابحث عن نوع التذكرة...',
                                                   hint: parentCategoryId == null
                                                       ? 'اختر القسم الرئيسي أولاً'
                                                       : state.isLoadingSubCategories
@@ -268,19 +268,11 @@ class _CreateTicketOrderState extends State<CreateTicketOrder> {
                             const SizedBox(height: 25),
                             LabeledFormField(
                               label: "وصف التذكرة",
+                              isOptional: true,
                               child: CustomTextFormField(
                                 hintText: "ادخل المشكلة بوضوح..",
                                 controller: msgController,
                                 maxLines: 5,
-                                validator: (value) {
-                                  if (value == null || value.trim().isEmpty) {
-                                    return "برجاء إدخال وصف التذكرة";
-                                  }
-                                  if (value.length < 10) {
-                                    return "وصف التذكرة يجب أن يكون أطول";
-                                  }
-                                  return null;
-                                },
                               ),
                             ),
                             const SizedBox(height: 25),

@@ -1,3 +1,4 @@
+import 'package:remotely/core/helpers/subscription_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -67,7 +68,8 @@ class _SupportScreenState extends State<SupportScreen> with RouteResumeRefreshMi
                   iconBgColor: CustomColorsManager.primaryColor,
                   title: 'تقديم تذكرة جديدة',
                   subtitle: 'أرسل طلبك وسنتواصل معك قريبا.',
-                  onTap: () {
+                  onTap: () async {
+                    if (!await ensureActiveSubscription()) return;
                     Get.toNamed(Routes.createTicketOrder)?.then((_) {
                       if (!mounted) return;
                       refreshWhenRouteResumed();

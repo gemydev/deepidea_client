@@ -60,21 +60,30 @@ class GetTicketConversationResponse {
 class TicketStatusEntry {
   final int? statusId;
   final String? statusName;
+  final String? traceTitle;
+  final String? message;
   final DateTime? createdDate;
+  final String? createdDateFormatted;
 
   TicketStatusEntry({
     this.statusId,
     this.statusName,
+    this.traceTitle,
+    this.message,
     this.createdDate,
+    this.createdDateFormatted,
   });
 
   factory TicketStatusEntry.fromJson(Map<String, dynamic> json) {
     return TicketStatusEntry(
       statusId: json['statusId'] is num ? (json['statusId'] as num).toInt() : null,
       statusName: json['statusName']?.toString(),
+      traceTitle: json['traceTitle']?.toString(),
+      message: json['message']?.toString(),
       createdDate: json['createdDate'] != null
           ? DateTime.tryParse(json['createdDate'].toString())
           : null,
+      createdDateFormatted: json['createdDateFormatted']?.toString(),
     );
   }
 
@@ -82,7 +91,10 @@ class TicketStatusEntry {
     return {
       'statusId': statusId,
       'statusName': statusName,
+      'traceTitle': traceTitle,
+      'message': message,
       'createdDate': createdDate?.toIso8601String(),
+      'createdDateFormatted': createdDateFormatted,
     };
   }
 }

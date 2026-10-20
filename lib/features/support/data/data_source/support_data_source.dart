@@ -160,7 +160,14 @@ class SupportDataSourceImp implements SupportDataSource {
 
       return finalResponse;
     } on DioException catch (e) {
-      throw ServerException(message: e.response!.data['message']);
+      final data = e.response?.data;
+      throw ServerException(
+        message: data is Map && data['message'] != null
+            ? data['message'].toString()
+            : 'تعذّر إرسال الرسالة',
+      );
+    } on FormatException {
+      throw ServerException(message: 'تعذّر إرسال الرسالة');
     }
   }
 

@@ -13,9 +13,6 @@ class CustomAssetsManager {
   static const String onBoarding3PNG = "${pngNewBasePath}onBoarding3.png";
 
   // *********** SVG ***********
-  static const String onBoarding1 = "${svgNewBasePath}onBoarding1.svg";
-  static const String onBoarding2 = "${svgNewBasePath}onBoarding2.svg";
-  static const String onBoarding3 = "${svgNewBasePath}onBoarding3.svg";
   static const String navHome = "${svgNewBasePath}home.svg";
   static const String navTickets = "${svgNewBasePath}tickets.svg";
   static const String navContact = "${svgNewBasePath}contact.svg";

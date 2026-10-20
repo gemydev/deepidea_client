@@ -33,6 +33,7 @@ class TicketFaqSection extends StatelessWidget {
             child: CustomText(
               state.message,
               style: CustomStyleManger.normalText.copyWith(color: CustomColorsManager.red),
+              overflow: TextOverflow.visible,
             ),
           );
         }
@@ -159,6 +160,7 @@ class _FaqExpansionTile extends StatelessWidget {
           title: CustomText(
             faq.question ?? '',
             style: CustomStyleManger.normalText.copyWith(fontWeight: FontWeight.w600),
+            overflow: TextOverflow.visible,
           ),
           children: [
             Align(
@@ -169,6 +171,7 @@ class _FaqExpansionTile extends StatelessWidget {
                   color: CustomColorsManager.mainTextColor,
                   height: 1.5,
                 ),
+                overflow: TextOverflow.visible,
               ),
             ),
             if (details != null && details.isNotEmpty) ...[
@@ -179,6 +182,7 @@ class _FaqExpansionTile extends StatelessWidget {
                   color: CustomColorsManager.lightTextColor,
                   fontSize: 14,
                 ),
+                overflow: TextOverflow.visible,
               ),
             ],
             if (hasYoutube || hasPdf) ...[

@@ -14,7 +14,6 @@ import 'core/constants/ui.dart';
 import 'core/helpers/preferences_manager.dart';
 import 'core/localization/controller/app_language.dart';
 import 'core/localization/translation.dart';
-import 'core/services/edfa_payment_service.dart.dart';
 import 'core/utils/color_manager/color_manager.dart';
 import 'core/utils/functions/set_local.dart';
 import 'core/utils/routes_manager/routes_manager.dart';
@@ -36,7 +35,6 @@ Future<void> main() async {
   await GetStorage.init();
   await init();
   Get.put(AppLanguage());
-  EdfaPaymentService.instance.initialize();
   await CallManager.setupEngine();
   await CallManager.initFromPreferences();
 
@@ -77,7 +75,7 @@ class MyApp extends StatelessWidget {
         );
       },
       color: CustomColorsManager.primaryColor,
-      title: 'DeepIdea',
+      title: 'Deep Idea',
       debugShowCheckedModeBanner: false,
       translations: Translation(),
       locale: Locale(defaultLocale),

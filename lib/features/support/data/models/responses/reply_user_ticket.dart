@@ -11,9 +11,11 @@ class ReplyUserTicketResponse {
 
   factory ReplyUserTicketResponse.fromJson(Map<String, dynamic> json) {
     return ReplyUserTicketResponse(
-      statusCode: json['statusCode'] as int,
-      message: json['message'] as String,
-      result: TicketResult.fromJson(json['result']),
+      statusCode: (json['statusCode'] as num?)?.toInt() ?? 0,
+      message: json['message']?.toString() ?? '',
+      result: json['result'] is Map
+          ? TicketResult.fromJson(Map<String, dynamic>.from(json['result'] as Map))
+          : TicketResult(ticketId: 0, ticketCode: '', ticketStatus: ''),
     );
   }
 
@@ -39,9 +41,9 @@ class TicketResult {
 
   factory TicketResult.fromJson(Map<String, dynamic> json) {
     return TicketResult(
-      ticketId: json['ticketId'] as int,
-      ticketCode: json['ticketCode'] as String,
-      ticketStatus: json['ticketStatus'] as String,
+      ticketId: (json['ticketId'] as num?)?.toInt() ?? 0,
+      ticketCode: json['ticketCode']?.toString() ?? '',
+      ticketStatus: json['ticketStatus']?.toString() ?? '',
     );
   }
 

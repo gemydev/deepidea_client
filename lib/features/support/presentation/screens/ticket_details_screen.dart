@@ -1,10 +1,14 @@
+import 'package:remotely/core/helpers/subscription_guard.dart';
+import 'dart:io';
 import 'dart:math' as math;
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/helpers/snakbar_manager.dart';
 import '../../../../core/navigation/route_resume_refresh_mixin.dart';
 import '../../../../core/utils/assets_manager/assets_manager.dart';
 import '../../../../core/utils/color_manager/color_manager.dart';
@@ -20,6 +24,7 @@ import '../../data/models/responses/get_all_tickets_response.dart';
 import '../../data/models/responses/get_ticket_details_response.dart';
 import '../cubits/close_ticket/close_ticket_cubit.dart';
 import '../cubits/get_all_tickets/get_all_tickets_cubit.dart';
+import '../cubits/get_ticket_conversation/get_ticket_conversation_cubit.dart';
 import '../cubits/get_ticket_details/get_ticket_details_cubit.dart';
 import '../cubits/re_open_ticket/re_open_ticket_cubit.dart';
 import '../widgets/order_details_taps/actions_timeline.dart';
@@ -40,6 +45,7 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
   late TabController _tabController;
   late Ticket ticket;
   late final GetTicketDetailsCubit _detailsCubit;
+  late final GetTicketConversationCubit _conversationCubit;
 
   @override
   void initState() {
@@ -48,16 +54,23 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
     _tabController = TabController(length: 2, vsync: this);
     _detailsCubit = sl<GetTicketDetailsCubit>();
     _detailsCubit.getTicketDetails(ticket.ticketId!.toString());
+    _conversationCubit = sl<GetTicketConversationCubit>();
+    _conversationCubit.getTicketConversation(ticket.ticketId!.toString());
   }
 
   @override
   void refreshWhenRouteResumed() {
     _detailsCubit.getTicketDetails(ticket.ticketId!.toString());
+    _conversationCubit.getTicketConversation(
+      ticket.ticketId!.toString(),
+      silent: true,
+    );
   }
 
   @override
   void dispose() {
     _detailsCubit.close();
+    _conversationCubit.close();
     _tabController.dispose();
     super.dispose();
   }
@@ -80,7 +93,10 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
     final t = _ticketFromState(_detailsCubit.state);
     sl<ReOpenTicketCubit>()
         .reOpenTicket(
-          ReOpenTicketRequest(ticketId: t.ticketId!.toInt(), message: 'إعادة فتح التذكرة'),
+          ReOpenTicketRequest(
+            ticketId: t.ticketId!.toInt(),
+            message: 'إعادة فتح التذكرة',
+          ),
         )
         .then((_) {
           Get.back();
@@ -99,9 +115,9 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
       listenWhen: (prev, curr) => curr is GetTicketDetailsError,
       listener: (context, state) {
         if (state is GetTicketDetailsError) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(const SnackBar(content: Text('تعذّر تحميل تفاصيل التذكرة')));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('تعذّر تحميل تفاصيل التذكرة')),
+          );
         }
       },
       child: BlocBuilder<GetTicketDetailsCubit, GetTicketDetailsState>(
@@ -133,9 +149,14 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
                           attachmentsFailed: attachmentsFailed,
                           onCloseTicket: _closeTicket,
                           onSendMessage: _showSendMessage,
-                          onReOpenTicket: displayTicket.statusId == 2 ? _reOpenTicket : null,
+                          onReOpenTicket: displayTicket.statusId == 2
+                              ? _reOpenTicket
+                              : null,
                         ),
-                        _ConversationTab(ticket: displayTicket, onSendMessage: _showSendMessage),
+                        _ConversationTab(
+                          ticket: displayTicket,
+                          conversationCubit: _conversationCubit,
+                        ),
                       ],
                     ),
                   ),
@@ -155,7 +176,11 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
       color: CustomColorsManager.white,
       child: Row(
         children: [
-          CircleIconButton(icon: Icons.arrow_back, filled: true, onTap: () => Get.back()),
+          CircleIconButton(
+            icon: Icons.arrow_back,
+            filled: true,
+            onTap: () => Get.back(),
+          ),
 
           const SizedBox(width: 12),
           Expanded(
@@ -222,12 +247,12 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: CustomColorsManager.white,
           unselectedLabelColor: CustomColorsManager.black,
-          labelStyle: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
-          unselectedLabelStyle: Theme.of(
-            context,
-          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
+          labelStyle: Theme.of(context).textTheme.bodyMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+            fontSize: 15,
+          ),
+          unselectedLabelStyle: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(fontWeight: FontWeight.w600, fontSize: 15),
           overlayColor: WidgetStateProperty.all(Colors.transparent),
           tabs: const [
             Tab(text: 'تفاصيل التذكرة'),
@@ -240,85 +265,226 @@ class _TicketDetailsScreenState extends State<TicketDetailsScreen>
 }
 
 class _ConversationTab extends StatelessWidget {
-  const _ConversationTab({required this.ticket, required this.onSendMessage});
+  const _ConversationTab({
+    required this.ticket,
+    required this.conversationCubit,
+  });
 
   final Ticket ticket;
-  final VoidCallback onSendMessage;
+  final GetTicketConversationCubit conversationCubit;
 
   @override
   Widget build(BuildContext context) {
+    final ticketId = ticket.ticketId.toString();
     return Column(
       children: [
-        Expanded(child: MessagesList(ticketId: ticket.ticketId.toString())),
-        _MessageInputBar(onSendMessage: onSendMessage),
+        Expanded(
+          child: MessagesList(ticketId: ticketId, cubit: conversationCubit),
+        ),
+        _MessageInputBar(
+          ticketId: ticketId,
+          conversationCubit: conversationCubit,
+        ),
       ],
     );
   }
 }
 
-class _MessageInputBar extends StatelessWidget {
-  const _MessageInputBar({required this.onSendMessage});
+class _MessageInputBar extends StatefulWidget {
+  const _MessageInputBar({
+    required this.ticketId,
+    required this.conversationCubit,
+  });
 
-  final VoidCallback onSendMessage;
+  final String ticketId;
+  final GetTicketConversationCubit conversationCubit;
+
+  @override
+  State<_MessageInputBar> createState() => _MessageInputBarState();
+}
+
+class _MessageInputBarState extends State<_MessageInputBar> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  final List<File> _attachments = [];
+  bool _sending = false;
+
+  Future<void> _pickAttachments() async {
+    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    if (result == null || !mounted) return;
+    setState(() {
+      for (final f in result.files) {
+        final path = f.path;
+        if (path != null) _attachments.add(File(path));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    if (_sending) return;
+
+    final text = _controller.text.trim();
+    if (text.isEmpty && _attachments.isEmpty) {
+      AppSnackBar.warning('من فضلك اكتب رسالة أولاً');
+      return;
+    }
+
+    if (!await ensureActiveSubscription()) return;
+    if (!mounted) return;
+
+    setState(() => _sending = true);
+    // Clear right away; the message is already visible in the thread as pending.
+    _controller.clear();
+    final files = List<File>.of(_attachments);
+    setState(_attachments.clear);
+
+    final sent = await widget.conversationCubit.sendMessage(
+      ticketId: widget.ticketId,
+      message: text,
+      attachments: files,
+    );
+
+    if (!mounted) return;
+    setState(() => _sending = false);
+
+    if (sent) {
+      AppSnackBar.success('تم إرسال الرسالة بنجاح');
+    } else {
+      AppSnackBar.error(
+        'تعذّر إرسال الرسالة، يمكنك إعادة المحاولة من داخل المحادثة',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-      child: Row(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 10,
+        bottom: 10 + MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          GestureDetector(
-            onTap: onSendMessage,
-            child: Container(
-              width: 48,
-              height: 48,
-              decoration: BoxDecoration(
-                color: CustomColorsManager.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: CustomColorsManager.grayColorForIcons),
-              ),
-              child: Transform.rotate(
-                angle: -math.pi,
-                child: Icon(Icons.send, color: CustomColorsManager.grayColorForIcons, size: 20),
+          if (_attachments.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 4,
+                  children: [
+                    for (var i = 0; i < _attachments.length; i++)
+                      InputChip(
+                        avatar: const Icon(Icons.attach_file, size: 16),
+                        label: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 160),
+                          child: Text(
+                            _attachments[i].path.split(RegExp(r'[/\\]')).last,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ),
+                        onDeleted: _sending
+                            ? null
+                            : () => setState(() => _attachments.removeAt(i)),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: GestureDetector(
-              onTap: onSendMessage,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: CustomColorsManager.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: CustomColorsManager.grayColorForIcons),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              GestureDetector(
+                onTap: _sending ? null : _send,
+                child: Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: _sending
+                        ? CustomColorsManager.unSelectedBorderColor
+                        : CustomColorsManager.primaryColor,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: _sending
+                      ? const Padding(
+                          padding: EdgeInsets.all(14),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : Transform.rotate(
+                          angle: -math.pi,
+                          child: Icon(
+                            Icons.send,
+                            color: CustomColorsManager.white,
+                            size: 20,
+                          ),
+                        ),
                 ),
-                child: CustomText(
-                  'اكتب الرسالة هنا...',
-                  style: CustomStyleManger.normalText.copyWith(
-                    fontSize: 15,
-                    color: CustomColorsManager.lightGrayTextColor,
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: _sending ? null : _pickAttachments,
+                icon: Icon(
+                  Icons.attach_file,
+                  color: CustomColorsManager.primaryColor,
+                ),
+                tooltip: 'إرفاق ملف',
+              ),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: CustomColorsManager.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: CustomColorsManager.grayColorForIcons,
+                    ),
+                  ),
+                  child: TextField(
+                    controller: _controller,
+                    focusNode: _focusNode,
+                    enabled: !_sending,
+                    minLines: 1,
+                    maxLines: 4,
+                    textInputAction: TextInputAction.send,
+                    onSubmitted: (_) => _send(),
+                    style: CustomStyleManger.normalText.copyWith(
+                      fontSize: 15,
+                      color: CustomColorsManager.black,
+                    ),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      hintText: 'اكتب الرسالة هنا...',
+                      hintStyle: CustomStyleManger.normalText.copyWith(
+                        fontSize: 15,
+                        color: CustomColorsManager.lightGrayTextColor,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ),
+            ],
           ),
-          // const SizedBox(width: 12),
-          // Container(
-          //   width: 48,
-          //   height: 48,
-          //   decoration: BoxDecoration(
-          //     color: CustomColorsManager.unSelectedBorderColor,
-          //     borderRadius: BorderRadius.circular(12),
-          //   ),
-          //   child: SvgPicture.asset(
-          //     CustomAssetsManager.uploadSvg,
-          //     width: 24,
-          //     height: 24,
-          //     fit: BoxFit.scaleDown,
-          //   ),
-          // ),
         ],
       ),
     );
@@ -428,12 +594,18 @@ class _TicketInfoCard extends StatelessWidget {
               Container(
                 width: 8,
                 height: 8,
-                decoration: BoxDecoration(color: accent, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: accent,
+                  shape: BoxShape.circle,
+                ),
               ),
               const SizedBox(width: 8),
               CustomText(
                 'تذكرة ${getStatusText(ticket.statusId).toLowerCase()}',
-                style: CustomStyleManger.normalText.copyWith(fontSize: 14, color: accent),
+                style: CustomStyleManger.normalText.copyWith(
+                  fontSize: 14,
+                  color: accent,
+                ),
               ),
             ],
           ),
@@ -455,7 +627,11 @@ class _TicketInfoCard extends StatelessWidget {
               height: 1.5,
             ),
           ),
-          Divider(color: CustomColorsManager.grayColorForIcons, endIndent: 10, indent: 10),
+          Divider(
+            color: CustomColorsManager.grayColorForIcons,
+            endIndent: 10,
+            indent: 10,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -472,7 +648,11 @@ class _TicketInfoCard extends StatelessWidget {
               Expanded(
                 child: Row(
                   children: [
-                    SvgPicture.asset(CustomAssetsManager.clock, width: 18, height: 18),
+                    SvgPicture.asset(
+                      CustomAssetsManager.clock,
+                      width: 18,
+                      height: 18,
+                    ),
                     const SizedBox(width: 8),
                     CustomText(
                       formatArabicDate(ticket.startDate ?? ''),
@@ -493,7 +673,11 @@ class _TicketInfoCard extends StatelessWidget {
 }
 
 class _AttachmentsSection extends StatelessWidget {
-  const _AttachmentsSection({required this.files, required this.loading, required this.loadFailed});
+  const _AttachmentsSection({
+    required this.files,
+    required this.loading,
+    required this.loadFailed,
+  });
 
   final List<FileItem> files;
   final bool loading;
@@ -543,7 +727,10 @@ class _AttachmentsSection extends StatelessWidget {
               separatorBuilder: (_, __) => const SizedBox(width: 12),
               itemBuilder: (context, index) {
                 final file = files[index];
-                final name = suggestedAttachmentFileName(file.fileUrl, file.docId);
+                final name = suggestedAttachmentFileName(
+                  file.fileUrl,
+                  file.docId,
+                );
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
@@ -562,11 +749,16 @@ class _AttachmentsSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                     child: Ink(
                       width: 120,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 10,
+                      ),
                       decoration: BoxDecoration(
                         color: CustomColorsManager.white,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: CustomColorsManager.grayColorForIcons),
+                        border: Border.all(
+                          color: CustomColorsManager.grayColorForIcons,
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -622,7 +814,10 @@ class _UpdatesLogSection extends StatelessWidget {
               Container(
                 width: 6,
                 height: 6,
-                decoration: BoxDecoration(color: CustomColorsManager.black, shape: BoxShape.circle),
+                decoration: BoxDecoration(
+                  color: CustomColorsManager.black,
+                  shape: BoxShape.circle,
+                ),
               ),
               const SizedBox(width: 8),
               CustomText(

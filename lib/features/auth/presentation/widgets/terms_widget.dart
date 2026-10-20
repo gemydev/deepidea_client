@@ -1,6 +1,8 @@
 import 'package:remotely/core/utils/color_manager/color_manager.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:remotely/core/utils/routes_manager/routes_manager.dart';
 
 class TermsAndPrivacyWidget extends StatelessWidget {
   const TermsAndPrivacyWidget({super.key});
@@ -31,7 +33,7 @@ class TermsAndPrivacyWidget extends StatelessWidget {
             style: TextStyle(color: CustomColorsManager.primaryColor, fontSize: 16),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
-                // Handle Privacy Policy tap
+                Get.toNamed(Routes.privacy);
               },
           ),
         ],
