@@ -6,6 +6,7 @@ import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/data/network/api.dart';
+import '../core/data/network/api_log_interceptor.dart';
 import '../core/data/network/dio_client.dart';
 import 'auth_injection/auth_injection.dart';
 import 'account/account_injection.dart';
@@ -42,6 +43,7 @@ Future<void> init() async {
     },
     baseUrl: Api.baseUrlPortal,
   );
+  dio.interceptors.add(ApiLogInterceptor());
   sl.registerLazySingleton(() => dio);
 
   accountInit(sl);

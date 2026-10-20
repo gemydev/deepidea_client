@@ -52,7 +52,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCsxYGSqZe2fM_cEborGGw28VA0JOMNyl4',
-    appId: '1:997238054211:android:f580d1e7fe2abd3a5823f6',
+    appId: '1:997238054211:android:789af42698177daa5823f6',
     messagingSenderId: '997238054211',
     projectId: 'remotely-app-r23y4',
     storageBucket: 'remotely-app-r23y4.firebasestorage.app',

@@ -1,3 +1,4 @@
+import 'package:remotely/core/helpers/subscription_guard.dart';
 import 'package:remotely/core/widgets/custom_button.dart';
 import 'package:remotely/core/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +173,8 @@ class AAPService extends StatelessWidget {
                             child: CustomButton(
                               text: "طلب الخدمة",
                               fontSize: 15,
-                              onPressed: () {
+                              onPressed: () async {
+                                if (!await ensureActiveSubscription()) return;
                                 Get.toNamed(Routes.orderService, arguments: [service]);
                               },
                               textColor: CustomColorsManager.white,

@@ -1,3 +1,4 @@
+import 'package:remotely/core/helpers/subscription_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -24,8 +25,10 @@ class CallButton extends StatelessWidget {
             children: [
               IconButton(
                 icon: const Icon(Icons.call, color: Colors.green),
-                onPressed: () {
-                  context.read<CallCubit>().startCall(
+                onPressed: () async {
+                  final callCubit = context.read<CallCubit>();
+                  if (!await ensureActiveSubscription()) return;
+                  callCubit.startCall(
                     calleeID: calleeID,
                     calleeName: calleeName,
                     isVideo: false,
@@ -39,8 +42,10 @@ class CallButton extends StatelessWidget {
               ),
               IconButton(
                 icon: const Icon(Icons.videocam, color: Colors.blue),
-                onPressed: () {
-                  context.read<CallCubit>().startCall(
+                onPressed: () async {
+                  final callCubit = context.read<CallCubit>();
+                  if (!await ensureActiveSubscription()) return;
+                  callCubit.startCall(
                     calleeID: calleeID,
                     calleeName: calleeName,
                     isVideo: true,

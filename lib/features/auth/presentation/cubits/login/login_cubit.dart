@@ -25,6 +25,7 @@ class LoginCubit extends Cubit<LoginState> {
 
     eitherPackagesOrFailure.fold(
       (failure) {
+        AppSnackBar.error("حدث خطأ، يرجى المحاولة مرة أخرى");
         emit(const LoginError(message: 'LoginError'));
         success = false;
       },
@@ -32,7 +33,12 @@ class LoginCubit extends Cubit<LoginState> {
         log(response.statusCode.toString());
         if (response.statusCode != 200) {
           success = false;
-          AppSnackBar.error("من فضلك تحقق من صحة المدخلات");
+          final message = response.statusMessage?.toString();
+          AppSnackBar.error(
+            (message != null && message.isNotEmpty)
+                ? message
+                : "من فضلك تحقق من صحة المدخلات",
+          );
           emit(const LoginError(message: 'LoginError'));
           emit(LoginInitial());
         } else {

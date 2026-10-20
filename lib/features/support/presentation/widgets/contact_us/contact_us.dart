@@ -1,3 +1,4 @@
+import 'package:remotely/core/helpers/subscription_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -20,6 +21,7 @@ class ContactUsColumn extends StatelessWidget {
   Future<void> _withAvailableSupporter(
     Future<void> Function(AvailableSupportResponse supporter) action,
   ) async {
+    if (!await ensureActiveSubscription()) return;
     try {
       final supporter =
           await CallApiService(sl<NetworkClient>()).getAvailableSupporter();

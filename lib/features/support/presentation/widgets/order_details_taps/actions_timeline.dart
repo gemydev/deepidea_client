@@ -127,7 +127,8 @@ class _ActionsTimelineState extends State<ActionsTimeline> {
 
         if (statusHistory != null && statusHistory.isNotEmpty) {
           for (final entry in statusHistory) {
-            final title = entry.statusName ?? '';
+            final traceTitle = entry.traceTitle?.trim() ?? '';
+            final title = traceTitle.isNotEmpty ? traceTitle : (entry.statusName ?? '');
             Conversation? relatedConversation;
             if (conversations != null && entry.createdDate != null) {
               for (final conv in conversations) {
@@ -143,7 +144,10 @@ class _ActionsTimelineState extends State<ActionsTimeline> {
             timelineItems.add({
               'status': title,
               'date': entry.createdDate,
-              'msg': relatedConversation?.msg ?? relatedConversation?.briefMsg,
+              'formatted': entry.createdDate != null
+                  ? formatArabicDateTime(entry.createdDate!.toIso8601String())
+                  : entry.createdDateFormatted,
+              'msg': entry.message ?? relatedConversation?.msg ?? relatedConversation?.briefMsg,
             });
           }
         } else if (conversations != null) {
@@ -175,6 +179,7 @@ class _ActionsTimelineState extends State<ActionsTimeline> {
               title: status.isNotEmpty ? status : 'تحديث',
               subtitle: subtitle,
               relativeTime: _arabicRelativeTime(date),
+              formattedDate: item['formatted']?.toString(),
               icon: _timelineIconForStatus(status),
             ),
           );
@@ -196,11 +201,13 @@ class _TimelineRow extends StatelessWidget {
     required this.subtitle,
     required this.relativeTime,
     required this.icon,
+    this.formattedDate,
   });
 
   final String title;
   final String? subtitle;
   final String relativeTime;
+  final String? formattedDate;
   final IconData icon;
 
   static const double _stripWidth = 48;
@@ -258,19 +265,29 @@ class _TimelineRow extends StatelessWidget {
                       height: 1.25,
                     ),
                   ),
-                  // if (subtitle != null) ...[
-                  //   const SizedBox(height: 4),
-                  //   CustomText(
-                  //     subtitle!,
-                  //     maxLines: 3,
-                  //     overflow: TextOverflow.ellipsis,
-                  //     style: CustomStyleManger.normalText.copyWith(
-                  //       fontSize: 12,
-                  //       color: CustomColorsManager.lightGrayTextColor,
-                  //       height: 1.3,
-                  //     ),
-                  //   ),
-                  // ],
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 4),
+                    CustomText(
+                      subtitle!,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: CustomStyleManger.normalText.copyWith(
+                        fontSize: 12,
+                        color: CustomColorsManager.lightGrayTextColor,
+                        height: 1.3,
+                      ),
+                    ),
+                  ],
+                  if (formattedDate != null && formattedDate!.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    CustomText(
+                      formattedDate!,
+                      style: CustomStyleManger.normalText.copyWith(
+                        fontSize: 11,
+                        color: CustomColorsManager.grayTextColor,
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

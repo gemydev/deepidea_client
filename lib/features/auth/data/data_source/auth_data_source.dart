@@ -9,6 +9,7 @@ import 'package:remotely/features/auth/data/models/responses/send_client_forgot_
 import 'package:remotely/features/auth/data/models/responses/send_otp_verification.dart';
 import 'package:remotely/features/auth/data/models/responses/verify_otp.dart';
 import 'package:dio/dio.dart';
+import 'package:remotely/core/data/network/api_log_interceptor.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/data/network/api.dart';
@@ -62,6 +63,11 @@ class AuthDataSourceImp implements AuthDataSource {
 
       return loginResponse;
     } on DioException catch (e) {
+      // Server rejected the login (e.g. 404 wrong credentials): surface its message.
+      final data = e.response?.data;
+      if (data is Map && data['statusMessage'] != null) {
+        return LoginResponse.fromJson(data);
+      }
       throw ServerException(message: "Server Exception: ${e.toString()}");
     }
   }
@@ -82,7 +88,7 @@ class AuthDataSourceImp implements AuthDataSource {
   Future<SendOtpVerificationResponse> sendOtpVerification(
     SendOtpVerificationRequest sendOtpVerificationRequest,
   ) async {
-    final Dio dio = Dio();
+    final Dio dio = Dio()..interceptors.add(ApiLogInterceptor());
 
     log(sendOtpVerificationRequest.toString());
 
@@ -102,7 +108,7 @@ class AuthDataSourceImp implements AuthDataSource {
 
   @override
   verifyOtp(VerifyOtpRequest request) async {
-    final Dio dio = Dio();
+    final Dio dio = Dio()..interceptors.add(ApiLogInterceptor());
 
     log(request.toString());
 

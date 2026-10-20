@@ -26,7 +26,7 @@ platform :android do
     UI.user_error!("APK not found: #{apk_path}. Expected split output for #{abi}.") unless File.exist?(apk_path)
 
     firebase_app_distribution(
-      app: options[:app_id] || ENV["FIREBASE_APP_ID"] || "1:997238054211:android:f580d1e7fe2abd3a5823f6",
+      app: options[:app_id] || ENV["FIREBASE_APP_ID"] || "1:997238054211:android:789af42698177daa5823f6",
       apk_path: apk_path,
       release_notes: options[:release_notes] || "Automated release from Fastlane (#{abi})",
       testers: options[:testers] || "mohamedgemy1211@gmail.com",

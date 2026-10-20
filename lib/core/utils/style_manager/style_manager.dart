@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 
 class CustomStyleManger {
   // Text Style for primary headings
-  static TextStyle heading1 = TextStyle(
+  static const TextStyle heading1 = TextStyle(
     fontSize: 24,
     fontWeight: FontWeight.bold,
     color: CustomColorsManager.mainTextColor,
   );
 
   // Text Style for primary headings
-  static TextStyle normalText = TextStyle(
+  static const TextStyle normalText = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.normal,
     color: CustomColorsManager.mainTextColor,

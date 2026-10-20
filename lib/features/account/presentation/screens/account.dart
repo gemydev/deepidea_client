@@ -16,6 +16,7 @@ import '../../../call_feature/call_manager.dart';
 import '../../../../injection_container/account/account_injection.dart';
 import '../../../../injection_container/injection_container.dart';
 import '../../../../shared_widgets/app_header_with_avatar.dart';
+import '../../../../shared_widgets/logout_confirmation_dialog.dart';
 import '../cubits/client_subscription_status/client_subscription_status_cubit.dart';
 import '../widgets/account_profile_design.dart';
 
@@ -82,6 +83,11 @@ class _AccountScreenState extends State<AccountScreen> with RouteResumeRefreshMi
 
   void _handleLogout() async {
     if (_isLoggingOut) return;
+
+    // Nothing happens until the user explicitly confirms.
+    final confirmed = await showLogoutConfirmationDialog();
+    if (!confirmed || !mounted) return;
+
     setState(() {
       _isLoggingOut = true;
     });
@@ -93,10 +99,11 @@ class _AccountScreenState extends State<AccountScreen> with RouteResumeRefreshMi
       AppSnackBar.success('تم تسجيل الخروج بنجاح.');
       TpPreferencesManager.clearAllData();
       TpPreferencesManager.saveBool(TpPreferencesManager.isLoggedIn, false);
-    } else {
-      AppSnackBar.error('حدث خطأ أثناء تسجيل الخروج.');
+      return;
     }
 
+    AppSnackBar.error('حدث خطأ أثناء تسجيل الخروج.');
+    if (!mounted) return;
     setState(() {
       _isLoggingOut = false;
     });

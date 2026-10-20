@@ -19,83 +19,6 @@ class NetworkClient {
     );
   }
 
-  String _fullRequestUrl(String pathOrUrl) {
-    final trimmed = pathOrUrl.trim();
-    if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-      return trimmed;
-    }
-    final base = dio.options.baseUrl;
-    final normalizedBase = base.endsWith('/') ? base : '$base/';
-    return Uri.parse(normalizedBase).resolve(trimmed).toString();
-  }
-
-  /// 🔹 Unified logger for all requests/responses/errors
-  void _logRequest(String method, String url, dynamic data, Map<String, dynamic>? headers) {
-    final fullUrl = _fullRequestUrl(url);
-    log("➡️ [$method] Request -> $fullUrl");
-    log("Headers: ${headers ?? {}}");
-    log("Body: $data");
-  }
-
-  void _logResponse(Response response) {
-    final fullUrl = response.requestOptions.uri.toString();
-    log("✅ Response [$fullUrl]");
-    log("Status code: ${response.statusCode}");
-    log("Data: ${response.data}");
-  }
-
-  /// Parses common API shapes for a human-readable server message.
-  String? _extractServerMessage(dynamic data) {
-    if (data == null) return null;
-    if (data is String) {
-      final t = data.trim();
-      return t.isEmpty ? null : t;
-    }
-    if (data is Map) {
-      final map = Map<dynamic, dynamic>.from(data);
-      for (final key in ['message', 'error', 'detail', 'title']) {
-        final v = map[key];
-        if (v != null) {
-          final s = v.toString().trim();
-          if (s.isNotEmpty) return s;
-        }
-      }
-      final errors = map['errors'];
-      if (errors is Map) {
-        final parts = <String>[];
-        for (final value in errors.values) {
-          if (value is List) {
-            for (final item in value) {
-              parts.add(item.toString());
-            }
-          } else if (value != null) {
-            parts.add(value.toString());
-          }
-        }
-        if (parts.isNotEmpty) return parts.join('; ');
-      }
-    }
-    return null;
-  }
-
-  void _logError(DioException e) {
-    final fullUrl = e.requestOptions.uri.toString();
-    log("❌ Error [$fullUrl] -> ${e.type}");
-    log("❌ Error message: ${e.message}");
-    log("❌ Error status code: ${e.response?.statusCode}");
-    if (e.response != null) {
-      log("StatusCode: ${e.response?.statusCode}");
-      final body = e.response?.data;
-      final serverMessage = _extractServerMessage(body);
-      if (serverMessage != null) {
-        log("Server message: $serverMessage");
-      }
-      log("Response: $body");
-    } else {
-      log("Error details: $e");
-    }
-  }
-
   /// 🔹 Retrieve token
   Future<String> _getToken() async {
     return TpPreferencesManager.retrieveString(TpPreferencesManager.authKey) ??
@@ -111,7 +34,6 @@ class NetworkClient {
   }) async {
     final token = await _getToken();
     final headers = {"auth_key": token};
-    _logRequest("GET", endpoint, request, headers);
 
     try {
       final response = await dio.get(
@@ -119,10 +41,8 @@ class NetworkClient {
         data: request,
         options: options ?? Options(headers: headers),
       );
-      _logResponse(response);
       return jsonDecode(response.toString());
     } on DioException catch (e) {
-      _logError(e);
       _handleDioException(e);
       rethrow;
     }
@@ -132,17 +52,14 @@ class NetworkClient {
   Future<Map<String, dynamic>> deleteData({required String endpoint, Options? options}) async {
     final token = await _getToken();
     final headers = {"Authorization": "Bearer $token"};
-    _logRequest("DELETE", endpoint, null, headers);
 
     try {
       final response = await dio.delete(
         endpoint,
         options: options ?? Options(receiveDataWhenStatusError: true, headers: headers),
       );
-      _logResponse(response);
       return jsonDecode(response.toString());
     } on DioException catch (e) {
-      _logError(e);
       _handleDioException(e);
       rethrow;
     }
@@ -156,7 +73,6 @@ class NetworkClient {
   }) async {
     final token = await _getToken();
     final headers = {"Authorization": "Bearer $token"};
-    _logRequest("PUT", endpoint, query, headers);
 
     try {
       final response = await dio.put(
@@ -170,10 +86,8 @@ class NetworkClient {
             ),
         data: query,
       );
-      _logResponse(response);
       return jsonDecode(response.toString());
     } on DioException catch (e) {
-      _logError(e);
       _handleDioException(e);
       rethrow;
     }
@@ -187,7 +101,6 @@ class NetworkClient {
   }) async {
     final token = await _getToken();
     final headers = {"auth_key": token};
-    _logRequest("POST", endpoint, query, headers);
 
     try {
       final response = await dio.post(
@@ -201,10 +114,8 @@ class NetworkClient {
             ),
         data: query,
       );
-      _logResponse(response);
       return jsonDecode(response.toString());
     } on DioException catch (e) {
-      _logError(e);
       _handleDioException(e);
       rethrow;
     }
@@ -222,7 +133,6 @@ class NetworkClient {
       'lang': lang,
       HttpHeaders.contentTypeHeader: 'application/json',
     };
-    _logRequest('POST-GUEST', endpoint, data, headers);
 
     try {
       final response = await dio.post(
@@ -235,10 +145,8 @@ class NetworkClient {
           headers: headers,
         ),
       );
-      _logResponse(response);
       return _responseBodyAsMap(response.data);
     } on DioException catch (e) {
-      _logError(e);
       final body = e.response?.data;
       if (body != null) {
         return _responseBodyAsMap(body);
@@ -266,7 +174,6 @@ class NetworkClient {
   }) async {
     final token = await _getToken();
     final headers = {"Authorization": "Bearer $token"};
-    _logRequest("POST-FORM", endpoint, query?.fields, headers);
 
     try {
       final response = await dio.post(
@@ -280,10 +187,8 @@ class NetworkClient {
             ),
         data: query,
       );
-      _logResponse(response);
       return jsonDecode(response.toString());
     } on DioException catch (e) {
-      _logError(e);
       _handleDioException(e);
       rethrow;
     }
@@ -300,7 +205,6 @@ class NetworkClient {
       "Authorization": "Bearer $token",
       "Content-Type": "application/x-www-form-urlencoded",
     };
-    _logRequest("POST-ENCODED", endpoint, query, headers);
 
     try {
       final response = await dio.post(
@@ -314,10 +218,8 @@ class NetworkClient {
             ),
         data: query,
       );
-      _logResponse(response);
       return jsonDecode(response.toString());
     } on DioException catch (e) {
-      _logError(e);
       _handleDioException(e);
       rethrow;
     }
@@ -325,26 +227,19 @@ class NetworkClient {
 
   /// Download (with progress)
   Future<File> download({required String url, required String savePath}) async {
-    _logRequest("DOWNLOAD", url, null, null);
-    try {
-      final response = await dio.get(
-        url,
-        onReceiveProgress: showDownloadProgress,
-        options: Options(
-          responseType: ResponseType.bytes,
-          followRedirects: false,
-          validateStatus: (status) => status! < 500,
-        ),
-      );
-      _logResponse(response);
+    final response = await dio.get(
+      url,
+      onReceiveProgress: showDownloadProgress,
+      options: Options(
+        responseType: ResponseType.bytes,
+        followRedirects: false,
+        validateStatus: (status) => status! < 500,
+      ),
+    );
 
-      final file = File(savePath);
-      file.writeAsBytesSync(response.data);
-      return file;
-    } on DioException catch (e) {
-      _logError(e);
-      rethrow;
-    }
+    final file = File(savePath);
+    file.writeAsBytesSync(response.data);
+    return file;
   }
 
   void showDownloadProgress(received, total) {

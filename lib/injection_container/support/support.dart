@@ -1,3 +1,4 @@
+import 'package:remotely/features/home/domain/use_cases/upload_file_use_case.dart';
 import 'package:remotely/features/chat/signal_r/chat_cubit/chat_cubit.dart';
 import 'package:remotely/features/support/data/data_source/support_data_source.dart';
 import 'package:remotely/features/support/domain/use_cases/close_ticket.dart';
@@ -52,6 +53,8 @@ Future<void> supportInit(GetIt sl) async {
   sl.registerFactory(
     () => GetTicketConversationCubit(
       getTicketConversationUseCase: sl<GetTicketConversationUseCase>(),
+      replyUserTicketUseCase: sl<ReplyUserTicketUseCase>(),
+      uploadFilesUseCase: sl<UploadFilesUseCase>(),
     ),
   );
   sl.registerFactory(

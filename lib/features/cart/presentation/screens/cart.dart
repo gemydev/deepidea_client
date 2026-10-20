@@ -8,16 +8,13 @@ import 'package:remotely/core/widgets/custom_image.dart';
 import 'package:remotely/core/widgets/custom_text.dart';
 import 'package:remotely/features/cart/presentation/cubit/post_invoices/post_invoices_cubit.dart';
 import 'package:remotely/features/support/presentation/widgets/sub_app_bar.dart';
-import 'package:edfapg_sdk/edfapg_sdk.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:get/get_navigation/src/snackbar/snackbar.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/helpers/preferences_manager.dart';
 import '../../../../core/helpers/snakbar_manager.dart';
-import '../../../../core/helpers/whatsapp_launcher.dart';
 import '../../../../core/services/firebase_analytics_service.dart';
 import '../../../../injection_container/injection_container.dart';
 import '../../../home/data/models/requests/get_packages_from_backage_bundel.dart';
@@ -78,200 +75,165 @@ class _CartState extends State<Cart> {
 
     if (!context.mounted) return;
 
-    final order = EdfaPgSaleOrder(
-      id: const Uuid().v4(),
-      description: "Order Payment",
-      currency: "SAR",
-      amount: totalPrice.abs(),
+    // Payment gateway integration removed. Wire the new gateway here and call
+    // [submitPaidInvoice] from its success callback.
+    AppSnackBar.error("خدمة الدفع غير متاحة حالياً");
+  }
+
+  /// Posts the confirmed invoice after a successful payment.
+  /// Call this from the payment gateway's success callback.
+  Future<void> submitPaidInvoice({
+    required num totalPrice,
+    Package? package,
+    List<ServiceItem>? services,
+  }) async {
+    final random = Random();
+    final randomFourDigits = 1000 + random.nextInt(9000);
+
+    final request = PostInvoicesWithConfirmRequest(
+      clientAccountNo: "11111",
+      invoiceCode: "OSI102636$randomFourDigits",
+      invoiceType: 0,
+      salesmanId: 2336,
+      invoicesStatus: 8,
+      packageBundleId: package?.packageId,
+      businessName: '',
+      taxNumber: '',
+      commercialRegister: '',
+      createdDate: DateTime.now().toUtc().toIso8601String(),
+      deliveryTime: DateTime.now().add(const Duration(days: 2)).toUtc().toIso8601String(),
+      inventoryId: 36,
+      invoiceDetails: "",
+      shippingStatus: 0,
+      paymentType: 4,
+      shippingPackageId: 0,
+      shippingPrice: 2.0,
+      userId: 2336,
+      websiteId: int.parse(
+        TpPreferencesManager.retrieveString(TpPreferencesManager.websiteId) ?? "0",
+      ),
+      clientName: TpPreferencesManager.retrieveString(TpPreferencesManager.clientName) ?? " ",
+      clientPhone:
+          TpPreferencesManager.retrieveString(TpPreferencesManager.clientPhone) ?? " ",
+      clientEmail:
+          TpPreferencesManager.retrieveString(TpPreferencesManager.clientEmail) ?? " ",
+      clientAddress:
+          TpPreferencesManager.retrieveString(TpPreferencesManager.clientAddress) ?? " ",
+      recievedInvoiceServices: [],
+      clientCode: "33333",
+      priceCode: "",
+      shiftId: null,
+      supplierNumber: null,
+      recievedInvoiceProducts: [],
+      recievedInvoiceSummary: [],
+      recievedInvoicePaymentType: [
+        RecievedInvoicePaymentType(
+          paymentType: 1,
+          amount: totalPrice.toDouble(),
+          details: "Paid via Credit Card",
+        ),
+      ],
+      recievedInvoiceTax: [],
     );
 
-    final payer = EdfaPgPayer(
-      firstName: "First Name",
-      lastName: "Last Name",
-      email: "support@edapay.com",
-      address: "EdfaPay Payment Gateway",
-      country: "SA",
-      city: "Riyadh",
-      zip: "123768",
-      phone: kSupportPhoneE164,
-      ip: "66.249.64.248",
-    );
+    // Package selling
+    if (package != null) {
+      final getPackagesCubit = sl<GetPackagesFromPackageBundleCubit>();
+      await getPackagesCubit.getPackagesFromPackageBundle(
+        GetPackagesFromPackageBundleRequest(
+          bundleId: package.packageId.toString(),
+          invoiceId: "",
+        ),
+      );
+      final currentState = getPackagesCubit.state;
 
-    EdfaCardPay edfaCardPay = EdfaCardPay()
-        .setRecurring(true)
-        .setOrder(order)
-        .setPayer(payer)
-        .setDesignType(EdfaPayDesignType.one)
-        .setLanguage(EdfaPayLanguage.ar)
-        .onTransactionSuccess((response) async {
-          final random = Random();
-          final randomFourDigits = 1000 + random.nextInt(9000);
-
-          final request = PostInvoicesWithConfirmRequest(
-            clientAccountNo: "11111",
-            invoiceCode: "OSI102636$randomFourDigits",
-            invoiceType: 0,
-            salesmanId: 2336,
-            invoicesStatus: 8,
-            packageBundleId: package?.packageId,
-            businessName: '',
-            taxNumber: '',
-            commercialRegister: '',
-            createdDate: DateTime.now().toUtc().toIso8601String(),
-            deliveryTime: DateTime.now().add(const Duration(days: 2)).toUtc().toIso8601String(),
-            inventoryId: 36,
-            invoiceDetails: "",
-            shippingStatus: 0,
-            paymentType: 4,
-            shippingPackageId: 0,
-            shippingPrice: 2.0,
-            userId: 2336,
-            websiteId: int.parse(
-              TpPreferencesManager.retrieveString(TpPreferencesManager.websiteId) ?? "0",
+      if (currentState is GetPackagesFromPackageBundleLoaded) {
+        for (final item in currentState.response.result!) {
+          request.recievedInvoiceProducts?.add(
+            RecievedInvoiceProduct(
+              productId: item.packageId ?? 0,
+              qnt: item.quantity!.toInt(),
+              productPrice: item.cost?.toDouble() ?? 0.0,
+              totalPrice: item.totalPrice?.toDouble() ?? 0.0,
+              details: item.packageName ?? '',
+              productDiscount: item.discount?.toDouble() ?? 0.0,
+              productTax: item.taxRate?.toDouble() ?? 0.0,
+              sn: "SN${item.packageId ?? 0}",
+              id: item.packageId ?? 0,
+              excutionPeriod: item.executionTime,
             ),
-            clientName: TpPreferencesManager.retrieveString(TpPreferencesManager.clientName) ?? " ",
-            clientPhone:
-                TpPreferencesManager.retrieveString(TpPreferencesManager.clientPhone) ?? " ",
-            clientEmail:
-                TpPreferencesManager.retrieveString(TpPreferencesManager.clientEmail) ?? " ",
-            clientAddress:
-                TpPreferencesManager.retrieveString(TpPreferencesManager.clientAddress) ?? " ",
-            recievedInvoiceServices: [],
-            clientCode: "33333",
-            priceCode: "",
-            shiftId: null,
-            supplierNumber: null,
-            recievedInvoiceProducts: [],
-            recievedInvoiceSummary: [],
-            recievedInvoicePaymentType: [
-              RecievedInvoicePaymentType(
-                paymentType: 1,
-                amount: totalPrice.toDouble(),
-                details: "Paid via Credit Card",
-              ),
-            ],
-            recievedInvoiceTax: [],
           );
+          request.packageBundleId = package.packageId;
+        }
+      } else if (currentState is GetPackagesFromPackageBundleError) {
+        AppSnackBar.error("فشل في تحميل محتوى الباقة");
+      }
+    }
 
-          // Package selling
-          if (package != null) {
-            final getPackagesCubit = sl<GetPackagesFromPackageBundleCubit>();
-            await getPackagesCubit.getPackagesFromPackageBundle(
-              GetPackagesFromPackageBundleRequest(
-                bundleId: package.packageId.toString(),
-                invoiceId: "",
+    // Free service selling
+    if (services != null && services.isNotEmpty) {
+      for (final service in services) {
+        request.recievedInvoiceProducts?.add(
+          RecievedInvoiceProduct(
+            productId: service.service?.autoId ?? 0,
+            qnt: service.quantity,
+            productPrice: service.subProductPrices?.first.price?.toDouble() ?? 0.0,
+            totalPrice:
+                (service.subProductPrices?.first.price?.toDouble() ?? 0) * service.quantity,
+            details: service.service?.details ?? '',
+            productDiscount: 0,
+            productTax: 0.0,
+            excutionPeriod: 12,
+            sn: "SN${service.service?.autoId ?? 0}",
+            id: service.service?.autoId ?? 0,
+          ),
+        );
+      }
+    }
+
+    await sl<PostInvoicesCubit>().postInvoices(postInvoicesWithConfirmRequest: request).then((
+      success,
+    ) async {
+      if (success) {
+        // Track successful payment event
+        await _analytics.logPurchase(
+          value: totalPrice.toDouble(),
+          currency: 'SAR',
+          transactionId: request.invoiceCode ?? '',
+          items: [
+            if (package != null)
+              AnalyticsEventItem(
+                itemId: package.packageId.toString(),
+                itemName: package.packageName ?? 'Package',
+                itemCategory: 'Package',
+                price: (package.priceDetails?.cost ?? 0).toDouble(),
+                quantity: 1,
               ),
-            );
-            final currentState = getPackagesCubit.state;
-
-            if (currentState is GetPackagesFromPackageBundleLoaded) {
-              for (final item in currentState.response.result!) {
-                request.recievedInvoiceProducts?.add(
-                  RecievedInvoiceProduct(
-                    productId: item.packageId ?? 0,
-                    qnt: item.quantity!.toInt(),
-                    productPrice: item.cost?.toDouble() ?? 0.0,
-                    totalPrice: item.totalPrice?.toDouble() ?? 0.0,
-                    details: item.packageName ?? '',
-                    productDiscount: item.discount?.toDouble() ?? 0.0,
-                    productTax: item.taxRate?.toDouble() ?? 0.0,
-                    sn: "SN${item.packageId ?? 0}",
-                    id: item.packageId ?? 0,
-                    excutionPeriod: item.executionTime,
-                  ),
-                );
-                request.packageBundleId = package.packageId;
-              }
-            } else if (currentState is GetPackagesFromPackageBundleError) {
-              AppSnackBar.error("فشل في تحميل محتوى الباقة");
-            }
-          }
-
-          // Free service selling
-          if (services != null && services.isNotEmpty) {
-            for (final service in services) {
-              request.recievedInvoiceProducts?.add(
-                RecievedInvoiceProduct(
-                  productId: service.service?.autoId ?? 0,
-                  qnt: service.quantity,
-                  productPrice: service.subProductPrices?.first.price?.toDouble() ?? 0.0,
-                  totalPrice:
-                      (service.subProductPrices?.first.price?.toDouble() ?? 0) * service.quantity,
-                  details: service.service?.details ?? '',
-                  productDiscount: 0,
-                  productTax: 0.0,
-                  excutionPeriod: 12,
-                  sn: "SN${service.service?.autoId ?? 0}",
-                  id: service.service?.autoId ?? 0,
+            if (services != null)
+              ...services.map(
+                (service) => AnalyticsEventItem(
+                  itemId: service.service?.autoId.toString() ?? '0',
+                  itemName: service.service?.pkgName ?? 'Service',
+                  itemCategory: 'Service',
+                  price: (service.subProductPrices?.first.price?.toDouble() ?? 0),
+                  quantity: service.quantity,
                 ),
-              );
-            }
-          }
+              ),
+          ],
+        );
 
-          await sl<PostInvoicesCubit>().postInvoices(postInvoicesWithConfirmRequest: request).then((
-            success,
-          ) async {
-            if (success) {
-              // Track successful payment event
-              await _analytics.logPurchase(
-                value: totalPrice.toDouble(),
-                currency: 'SAR',
-                transactionId: request.invoiceCode ?? '',
-                items: [
-                  if (package != null)
-                    AnalyticsEventItem(
-                      itemId: package.packageId.toString(),
-                      itemName: package.packageName ?? 'Package',
-                      itemCategory: 'Package',
-                      price: (package.priceDetails?.cost ?? 0).toDouble(),
-                      quantity: 1,
-                    ),
-                  if (services != null)
-                    ...services.map(
-                      (service) => AnalyticsEventItem(
-                        itemId: service.service?.autoId.toString() ?? '0',
-                        itemName: service.service?.pkgName ?? 'Service',
-                        itemCategory: 'Service',
-                        price: (service.subProductPrices?.first.price?.toDouble() ?? 0),
-                        quantity: service.quantity,
-                      ),
-                    ),
-                ],
-              );
-
-              sl<CartCubit>().emptyCart();
-              AppSnackBar.success("تمت عملية الدفع بنجاح!");
-            } else {
-              // Track payment failure event
-              await _analytics.logPaymentFailed(
-                value: totalPrice.toDouble(),
-                currency: 'SAR',
-                reason: 'invoice_upload_failed',
-              );
-              AppSnackBar.error("حدثت مشكلة في رفع الفاتورة");
-            }
-          });
-        })
-        .onTransactionFailure((response) async {
-          // Track payment failure event
-          await _analytics.logPaymentFailed(
-            value: totalPrice.toDouble(),
-            currency: 'SAR',
-            reason: 'transaction_failed',
-          );
-          AppSnackBar.error("فشلت عملية الدفع، حاول مرة أخرى");
-        })
-        .onError((error) async {
-          // Track payment error event
-          await _analytics.logPaymentError(
-            value: totalPrice.toDouble(),
-            currency: 'SAR',
-            error: error.toString(),
-          );
-          AppSnackBar.error("حدث خطأ أثناء الدفع", position: SnackPosition.TOP);
-        });
-    if (!mounted) return;
-    edfaCardPay.initialize(context);
+        sl<CartCubit>().emptyCart();
+        AppSnackBar.success("تمت عملية الدفع بنجاح!");
+      } else {
+        // Track payment failure event
+        await _analytics.logPaymentFailed(
+          value: totalPrice.toDouble(),
+          currency: 'SAR',
+          reason: 'invoice_upload_failed',
+        );
+        AppSnackBar.error("حدثت مشكلة في رفع الفاتورة");
+      }
+    });
   }
 
   @override

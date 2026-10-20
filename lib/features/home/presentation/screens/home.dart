@@ -1,3 +1,4 @@
+import 'package:remotely/core/helpers/subscription_guard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -65,7 +66,8 @@ class _HomeScreenState extends State<HomeScreen> with RouteResumeRefreshMixin {
                   iconPath: CustomAssetsManager.ticket2,
                   title: 'رفع تذكرة جديدة',
                   subtitle: 'اخبرنا كيف يمكننا مساعدتك اليوم',
-                  onTap: () {
+                  onTap: () async {
+                    if (!await ensureActiveSubscription()) return;
                     Get.toNamed(Routes.createTicketOrder)?.then((_) {
                       if (!mounted) return;
                       refreshWhenRouteResumed();
